@@ -1,0 +1,10 @@
+{
+  "name": "@modbagman/craftableupgrades",
+  "version": "1.0.0",
+  "scripts": {
+    "build:base": "tsc",
+    "build:win": "npm run build:base && npm run pack:win && npm run install",
+    "pack:win": "powershell Compress-Archive -Path dist/CraftableUpgrades_dev/* -DestinationPath dist/CraftableUpgrades.zip -Force",
+    "install": "python install.py"
+  }
+}
