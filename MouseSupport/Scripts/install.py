@@ -36,5 +36,5 @@ if sog_install_path is not None:
         os.mkdir(sog_install_path + 'Mods')
     except:
         pass
-    shutil.copyfile(output_path + 'GrindeaMouseSupport.dll', sog_install_path + 'Mods/GrindeaMouseSupport.dll')
-    print('Installed Mouse Support Mod in SoG directory.')
+    shutil.copyfile(output_path + 'GrindeaMouseSupport.dll', sog_install_path + 'ModBagmanData/Mods/GrindeaMouseSupport.dll')
+    print('Installed OHKO mod in SoG directory.')

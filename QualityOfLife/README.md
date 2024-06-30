@@ -1,4 +1,4 @@
-Quality of Life mod for Secrets of Grindea using Grindless.
+Quality of Life mod for Secrets of Grindea using ModBagman.
 
 # Features
 
@@ -16,7 +16,7 @@ Changelist:
 
 # Installation
 
-Download the mod DLL and place it inside the Mods/ folder created by Grindless.
+Download the mod DLL and place it inside the ModBagmanData/Mods/ folder created by ModBagman.
 
 # Reporting bugs
 

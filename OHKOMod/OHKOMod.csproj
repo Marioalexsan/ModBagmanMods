@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<RootNamespace>Marioalexsan.GrindeaQoL</RootNamespace>
-		<AssemblyName>GrindeaQoL</AssemblyName>
+		<RootNamespace>OHKOMod</RootNamespace>
+		<AssemblyName>OHKOMod</AssemblyName>
 		<TargetFramework>net472</TargetFramework>
 
 		<LangVersion>11.0</LangVersion>
@@ -15,7 +15,6 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Console" Version="7.0.0" />
-		<PackageReference Include="System.IO.Compression" Version="4.3.0" />
 	</ItemGroup>
 	
 	<ItemGroup>
@@ -39,21 +38,6 @@
         </Reference>
 	</ItemGroup>
 	
-	<ItemGroup>
-	  <Compile Update="Resources\Resource.Designer.cs">
-	    <DesignTime>True</DesignTime>
-	    <AutoGen>True</AutoGen>
-	    <DependentUpon>Resource.resx</DependentUpon>
-	  </Compile>
-	</ItemGroup>
-	
-	<ItemGroup>
-	  <EmbeddedResource Update="Resources\Resource.resx">
-	    <Generator>ResXFileCodeGenerator</Generator>
-	    <LastGenOutput>Resource.Designer.cs</LastGenOutput>
-	  </EmbeddedResource>
-	</ItemGroup>
-
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 		<Exec Command="python ./Scripts/install.py" />
 	</Target>

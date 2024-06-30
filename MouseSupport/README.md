@@ -1,4 +1,4 @@
-Mouse Support mod for Secrets of Grindea using Grindless.
+Mouse Support mod for Secrets of Grindea using Modbagman.
 
 # Features
 
@@ -15,7 +15,7 @@ The full list of supported actions is as follows:
 
 # Installation
 
-Download the mod DLL and place it inside the Mods/ folder created by Grindless.
+Download the mod DLL and place it inside the ModBagmanData/Mods/ folder created by ModBagman.
 
 # Reporting bugs
 

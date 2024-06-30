@@ -36,5 +36,5 @@ if sog_install_path is not None:
         os.mkdir(sog_install_path + 'Mods')
     except:
         pass
-    shutil.copyfile(output_path + 'WikiDataExtractor.dll', sog_install_path + 'Mods/WikiDataExtractor.dll')
+    shutil.copyfile(output_path + 'WikiDataExtractor.dll', sog_install_path + 'ModBagmanData/Mods/WikiDataExtractor.dll')
     print('Installed WikiDataExtractor in SoG directory.')

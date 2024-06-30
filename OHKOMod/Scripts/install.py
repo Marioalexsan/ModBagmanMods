@@ -36,5 +36,5 @@ if sog_install_path is not None:
         os.mkdir(sog_install_path + 'Mods')
     except:
         pass
-    shutil.copyfile(output_path + 'GrindeaQoL.dll', sog_install_path + 'ModBagmanData/Mods/GrindeaQoL.dll')
-    print('Installed QoL Mod in SoG directory.')
+    shutil.copyfile(output_path + 'OHKOMod.dll', sog_install_path + 'ModBagmanData/Mods/OHKOMod.dll')
+    print('Installed Mouse Support Mod in SoG directory.')

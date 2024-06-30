@@ -20,9 +20,30 @@ public class WikiMod : Mod
         CreateCommands().AutoAddModCommands("wiki");
     }
 
-    public static string Escape(string input)
+    public static string ProcessString(string input)
     {
-        return input.Replace("\"", "\\\"");
+        string result = input.Replace("\"", "\\\"").Replace("\n", "\\n");
+
+        // Handle potions because they have to be special for some reason
+		result = result.Replace("[APOT]", SpellVariable.Get(SpellVariable.Handle.Misc_PotionWealth_GoldIncrease).ToString());
+		result = result.Replace("[APOTS]", SpellVariable.Get(SpellVariable.Handle.Misc_PotionWealth_BaseDuration).ToString());
+		result = result.Replace("[ARPOT]", SpellVariable.Get(SpellVariable.Handle.Misc_PotionArrow_ArrowsGained).ToString());
+		result = result.Replace("[CPOTS]", SpellVariable.Get(SpellVariable.Handle.Misc_PotionChicken_BaseDuration).ToString());
+		result = result.Replace("[PPOT]", SpellVariable.Get(SpellVariable.Handle.Misc_PotionCrit_Increase).ToString());
+		result = result.Replace("[PPOTS]", SpellVariable.Get(SpellVariable.Handle.Misc_PotionCrit_BaseDuration).ToString());
+		result = result.Replace("[LPOT]", SpellVariable.Get(SpellVariable.Handle.Misc_PotionLoot_ChanceIncrease).ToString());
+		result = result.Replace("[LPOTS]", SpellVariable.Get(SpellVariable.Handle.Misc_PotionLoot_BaseDuration).ToString());
+		result = result.Replace("[SPOT]", SpellVariable.Get(SpellVariable.Handle.Misc_PotionSpeed_Increase).ToString());
+		result = result.Replace("[SPOTS]", SpellVariable.Get(SpellVariable.Handle.Misc_PotionSpeed_BaseDuration).ToString());
+		result = result.Replace("[EPOT]", SpellVariable.Get(SpellVariable.Handle.Misc_PotionEnergy_EPGainedFromPotionInPCT).ToString());
+		result = result.Replace("[DPOT]", SpellVariable.Get(SpellVariable.Handle.Misc_PotionDamage_DMGIncreaseInPCT).ToString());
+		result = result.Replace("[DPOTS]", SpellVariable.Get(SpellVariable.Handle.Misc_PotionDamage_BaseDuration).ToString());
+		result = result.Replace("[HPPOT]", SpellVariable.Get(SpellVariable.Handle.Misc_PotionHealth_HealthGainedFromPotionInPCT).ToString());
+		result = result.Replace("[LPOT]", SpellVariable.Get(SpellVariable.Handle.Misc_PotionLightning_SparksToSpawn).ToString());
+		result = result.Replace("[LPOTS]", SpellVariable.Get(SpellVariable.Handle.Misc_PotionLightning_SparksToSpawn_OnOtherPotion).ToString());
+		result = result.Replace("[LPOTD]", SpellVariable.Get(SpellVariable.Handle.Misc_PotionLightning_BaseDuration).ToString());
+
+        return result;
     }
 
     [ModCommand("extract")]
@@ -52,9 +73,13 @@ public class WikiMod : Mod
     {
         try
         {
-            var stats = new Dictionary<EquipmentInfo.StatEnum, string>
+            var petStats = new Dictionary<PetInfo.PetBonus, string>
             {
-                [EquipmentInfo.StatEnum.ATK] = "atk",
+                [PetInfo.PetBonus.Damage] = "Damage",
+                [PetInfo.PetBonus.SP] = "EP",
+                [PetInfo.PetBonus.HP] = "HP",
+                [PetInfo.PetBonus.Crit] = "Crit",
+                [PetInfo.PetBonus.Speed] = "Speed",
             };
 
             var stopwatch = new Stopwatch();
@@ -67,7 +92,7 @@ public class WikiMod : Mod
 
             builder.AppendLine($"--[[ BEGIN AUTOGEN ITEM TABLE --]]");
             builder.AppendLine($"--[[ Game version: {Globals.GrindeaVersion} --]]");
-            builder.AppendLine("local itemStats = {");
+            builder.AppendLine("local stats = {");
             builder.AppendLine();
 
             foreach (var id in ids)
@@ -76,6 +101,10 @@ public class WikiMod : Mod
 
                 if (entry != null)
                 {
+                    if (entry.ModID.Contains("OBSOLETE")) {
+                        continue; // Skip over garbage
+                    }
+
                     var desc = ItemCodex.GetItemDescription(entry.GameID);
 
                     var equip = EquipmentCodex.GetArmorInfo(entry.GameID);
@@ -96,7 +125,7 @@ public class WikiMod : Mod
 
                     foreach (var cat in desc.lenCategory)
                     {
-                        builder.Append($"\"{Escape(Enum.GetName(typeof(ItemCodex.ItemCategories), cat))}\",");
+                        builder.Append($"\"{ProcessString(Enum.GetName(typeof(ItemCodex.ItemCategories), cat))}\",");
                     }
 
                     if (builder[builder.Length - 1] == ',')
@@ -105,12 +134,20 @@ public class WikiMod : Mod
                     }
 
                     builder.AppendLine(" },");
-                    builder.AppendLine($" name = \"{Escape(entry.Name ?? "_NO_NAME_")}\",");
-                    builder.AppendLine($" desc = \"{Escape(entry.Description ?? "_NO_DESC_")}\",");
+                    builder.AppendLine($" name = \"{ProcessString(entry.Name ?? "")}\",");
+
+                    // This might crash for unimplemented items
+                    try {
+                        builder.AppendLine($" desc = \"{ProcessString(Globals.Game.MiscTextLibrary_GetText("Items", desc.sDescriptionLibraryHandle))}\",");
+                    }
+                    catch {
+                        Logger.LogWarning("No description available for " + entry.Name);
+                    }
+                    
 
                     if (entry.Value > 0)
                     {
-                        builder.AppendLine($"value = {entry.Value},");
+                        builder.AppendLine($" value = {entry.Value},");
                     }
 
                     if (entry.ArcadeValueModifier != 1f)
@@ -119,6 +156,7 @@ public class WikiMod : Mod
                     }
 
                     bool hasStats = false;
+                    string type = "unknown";
 
                     if (entry.EquipType != EquipmentType.None)
                     {
@@ -142,19 +180,24 @@ public class WikiMod : Mod
                             builder.AppendLine($" cspd = {entry[EquipmentInfo.StatEnum.CSPD]},");
                             hasStats = true;
                         }
-                        if (entry[EquipmentInfo.StatEnum.MaxHP] != 0)
+                        if (entry[EquipmentInfo.StatEnum.HP] != 0)
                         {
-                            builder.AppendLine($" maxhp = {entry[EquipmentInfo.StatEnum.MaxHP]},");
+                            builder.AppendLine($" maxhp = {entry[EquipmentInfo.StatEnum.HP]},");
                             hasStats = true;
                         }
-                        if (entry[EquipmentInfo.StatEnum.MaxEP] != 0)
+                        if (entry[EquipmentInfo.StatEnum.EP] != 0)
                         {
-                            builder.AppendLine($" epreg = {entry[EquipmentInfo.StatEnum.MaxEP]},");
+                            builder.AppendLine($" maxep = {entry[EquipmentInfo.StatEnum.EP]},");
                             hasStats = true;
                         }
                         if (entry[EquipmentInfo.StatEnum.EPRegen] != 0)
                         {
-                            builder.AppendLine($" def = {entry[EquipmentInfo.StatEnum.EPRegen]},");
+                            builder.AppendLine($" epreg = {entry[EquipmentInfo.StatEnum.EPRegen]},");
+                            hasStats = true;
+                        }
+                        if (entry[EquipmentInfo.StatEnum.DEF] != 0)
+                        {
+                            builder.AppendLine($" def = {entry[EquipmentInfo.StatEnum.DEF]},");
                             hasStats = true;
                         }
                         if (entry[EquipmentInfo.StatEnum.ShldHP] != 0)
@@ -174,11 +217,9 @@ public class WikiMod : Mod
                         }
                         if (equip != null && equip.lenSpecialEffects.Count > 0)
                         {
-                            builder.AppendLine($" special = {Escape(Enum.GetName(typeof(EquipmentInfo.SpecialEffect), equip.lenSpecialEffects[0]))},");
+                            builder.AppendLine($" special = \"{ProcessString(Enum.GetName(typeof(EquipmentInfo.SpecialEffect), equip.lenSpecialEffects[0]))}\",");
                             hasStats = true;
                         }
-
-                        string type = "unknown";
 
                         if (entry.EquipType == EquipmentType.Weapon)
                         {
@@ -233,6 +274,16 @@ public class WikiMod : Mod
                         {
                             type = "shield";
                         }
+                    }
+                    else {
+                        if (desc.lenCategory.Contains(ItemCodex.ItemCategories.Usable))
+                        {
+                            type = "usable";
+                        }
+                        else if (id.Contains("_PotionType"))
+                        {
+                            type = "usable";
+                        }
                         else if (desc.lenCategory.Contains(ItemCodex.ItemCategories.KeyItem))
                         {
                             type = "keyitem";
@@ -253,10 +304,34 @@ public class WikiMod : Mod
                         {
                             type = "treasuremap";
                         }
-
-                        builder.AppendLine($" type = \"{Escape(type)}\""); // This one has no comma, must be last
+                        else if (id.Contains("_Usable"))
+                        {
+                            type = "usable";
+                        }
+                        else if (id.Contains("_Special"))
+                        {
+                            type = "special";
+                        }
+                        else if (id.Contains("_KeyItem"))
+                        {
+                            type = "keyitem";
+                        }
+                        else if (id.Contains("_Furniture"))
+                        {
+                            type = "furniture";
+                        }
+                        else if (id.Contains("_Misc"))
+                        {
+                            type = "misc";
+                        }
+                    }
+                    
+                    if (PetCodex.denxFoodInfo.ContainsKey(entry.GameID)) {
+                        builder.AppendLine($" foodtype = \"{petStats[PetCodex.denxFoodInfo[entry.GameID].enBonusType]}\",");
+                        builder.AppendLine($" foodexp = {PetCodex.denxFoodInfo[entry.GameID].iBonusValue},");
                     }
 
+                    builder.AppendLine($" type = \"{ProcessString(type)}\""); // This one has no comma, must be last
                     builder.AppendLine("},");
                 }
             }

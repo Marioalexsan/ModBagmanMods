@@ -28,8 +28,6 @@ namespace Marioalexsan.GrindeaQoL
 
         public QualityOfLifeMod()
         {
-            QoLResources.ReloadResources();
-
             _initCleanupList = new List<(Action, Action)>
             {
                 (BetterSpecialEffectNames.Init, null),
@@ -43,6 +41,8 @@ namespace Marioalexsan.GrindeaQoL
         public override void Load()
         {
             Instance = this;
+            
+            QoLResources.ReloadResources();
 
             foreach (var (init, _) in _initCleanupList)
                 init?.Invoke();
