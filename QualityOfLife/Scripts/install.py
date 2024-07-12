@@ -33,7 +33,7 @@ output_path = '../bin/x86/Debug/net472/'
 
 if sog_install_path is not None:
     try:
-        os.mkdir(sog_install_path + 'Mods')
+        os.mkdir(sog_install_path + 'ModBagmanData/Mods')
     except:
         pass
     shutil.copyfile(output_path + 'GrindeaQoL.dll', sog_install_path + 'ModBagmanData/Mods/GrindeaQoL.dll')

@@ -41,8 +41,6 @@ namespace Marioalexsan.GrindeaQoL
         public override void Load()
         {
             Instance = this;
-            
-            QoLResources.ReloadResources();
 
             foreach (var (init, _) in _initCleanupList)
                 init?.Invoke();

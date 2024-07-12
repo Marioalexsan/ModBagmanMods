@@ -10,7 +10,6 @@ Changelist:
 * Summon Plant's Boss plant now has a radius indicator for plant buff
 * Textboxes in game now allow moving the cursor and editing in the middle of text
 * Frosty's Silver Charge HP now scales correctly off of MATK (150% -> 200%)
-* You can now switch to Normal+ difficulty in Story. This is (almost) the same as Arcade's Catalyst of Power (or Difficulty = 1 for devs)
 * Most enemy health bars now show exact HP and MaxHP
 
 

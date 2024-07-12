@@ -4,7 +4,6 @@ using System;
 using System.Diagnostics;
 using System.Text;
 using SoG;
-using Esprima.Ast;
 using System.Collections.Generic;
 using System.IO;
 
